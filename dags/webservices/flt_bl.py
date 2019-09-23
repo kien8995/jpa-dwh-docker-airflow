@@ -58,35 +58,40 @@ class FLT_BLTask(object):
     def __check_table(self, **context):
         if not check_table_exist(self.table_id):
             schema = [
-                bigquery.SchemaField("FlightDate", "DATE", mode="NULLABLE"),
-                bigquery.SchemaField("CarrierCode", "STRING", mode="NULLABLE"),
-                bigquery.SchemaField("FlightNumber", "STRING", mode="NULLABLE"),
-                bigquery.SchemaField("DepartureDate", "DATE", mode="NULLABLE"),
-                bigquery.SchemaField("ArrivalDate", "DATE", mode="NULLABLE"),
-                bigquery.SchemaField("Leg_STD", "STRING", mode="NULLABLE"),
-                bigquery.SchemaField("Leg_STA", "STRING", mode="NULLABLE"),
-                bigquery.SchemaField("ADT", "INTEGER", mode="NULLABLE"),
-                bigquery.SchemaField("CHD", "INTEGER", mode="NULLABLE"),
-                bigquery.SchemaField("INF", "INTEGER", mode="NULLABLE"),
-                bigquery.SchemaField("DepartureStation", "STRING", mode="NULLABLE"),
-                bigquery.SchemaField("ArrivalStation", "STRING", mode="NULLABLE"),
-                bigquery.SchemaField("Segment", "STRING", mode="NULLABLE"),
-                bigquery.SchemaField("Capacity", "INTEGER", mode="NULLABLE"),
-                bigquery.SchemaField("BD", "INTEGER", mode="NULLABLE"),
-                bigquery.SchemaField("NS", "INTEGER", mode="NULLABLE"),
-                bigquery.SchemaField("PaxRev", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("BaggageAmount", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("Other_Rev", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("CargoRev", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("VCost", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("FCost", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("TotalCost", "FLOAT", mode="NULLABLE"),
-                bigquery.SchemaField("QTQN", "STRING", mode="NULLABLE"),
-                bigquery.SchemaField("FLS_TYPE", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("flight_date", "DATE", mode="NULLABLE"),
+                bigquery.SchemaField("carrier_code", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("flight_number", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("departure_date", "DATE", mode="NULLABLE"),
+                bigquery.SchemaField("arrival_date", "DATE", mode="NULLABLE"),
+                bigquery.SchemaField("leg_std", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("leg_sta", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("adt", "INTEGER", mode="NULLABLE"),
+                bigquery.SchemaField("chd", "INTEGER", mode="NULLABLE"),
+                bigquery.SchemaField("inf", "INTEGER", mode="NULLABLE"),
+                bigquery.SchemaField("departure_station", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("arrival_station", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("segment", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("capacity", "INTEGER", mode="NULLABLE"),
+                bigquery.SchemaField("bd", "INTEGER", mode="NULLABLE"),
+                bigquery.SchemaField("ns", "INTEGER", mode="NULLABLE"),
+                bigquery.SchemaField("pax_rev", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("baggage_amount", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("other_rev", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("cargo_rev", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("v_cost", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("f_cost", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("total_cost", "FLOAT", mode="NULLABLE"),
+                bigquery.SchemaField("qtqn", "STRING", mode="NULLABLE"),
+                bigquery.SchemaField("fls_type", "STRING", mode="NULLABLE"),
             ]
 
             client = bigquery.Client()
             table = bigquery.Table(self.table_id, schema=schema)
+            table.time_partitioning = bigquery.TimePartitioning(
+                type_=bigquery.TimePartitioningType.DAY,
+                field="flight_date"
+            )
+            table.clustering_fields = ["flight_number"]
             table = client.create_table(table)
             print(
                 "Created table {}.{}.{}".format(table.project, table.dataset_id, table.table_id)
@@ -107,31 +112,31 @@ class FLT_BLTask(object):
         results = []
         for x in data:
             tmp_dict = {}
-            tmp_dict['FlightDate'] = datetime.strptime(x['FlightDate'], '%Y%m%d').strftime('%Y-%m-%d')
-            tmp_dict['CarrierCode'] = x['CarrierCode']
-            tmp_dict['FlightNumber'] = x['FlightNumber'].strip()
-            tmp_dict['DepartureDate'] = datetime.strptime(x['DepartureDate'], '%Y%m%d').strftime('%Y-%m-%d')
-            tmp_dict['ArrivalDate'] = datetime.strptime(x['ArrivalDate'], '%Y%m%d').strftime('%Y-%m-%d')
-            tmp_dict['Leg_STD'] = x['Leg_STD']
-            tmp_dict['Leg_STA'] = x['Leg_STA']
-            tmp_dict['ADT'] = x['ADT']
-            tmp_dict['CHD'] = x['CHD']
-            tmp_dict['INF'] = x['INF']
-            tmp_dict['DepartureStation'] = x['DepartureStation']
-            tmp_dict['ArrivalStation'] = x['ArrivalStation']
-            tmp_dict['Segment'] = x['Segment']
-            tmp_dict['Capacity'] = x['Capacity']
-            tmp_dict['BD'] = x['BD']
-            tmp_dict['NS'] = x['NS']
-            tmp_dict['PaxRev'] = x['PaxRev']
-            tmp_dict['BaggageAmount'] = float(x['BaggageAmount'])
-            tmp_dict['Other_Rev'] = float(x['Other_Rev'])
-            tmp_dict['CargoRev'] = float(x['CargoRev'])
-            tmp_dict['VCost'] = float(x['VCost'])
-            tmp_dict['FCost'] = float(x['FCost'])
-            tmp_dict['TotalCost'] = float(x['TotalCost'])
-            tmp_dict['QTQN'] = x['QTQN']
-            tmp_dict['FLS_TYPE'] = x['FLS_TYPE']
+            tmp_dict['flight_date'] = datetime.strptime(x['FlightDate'], '%Y%m%d').strftime('%Y-%m-%d')
+            tmp_dict['carrier_code'] = x['CarrierCode']
+            tmp_dict['flight_number'] = x['FlightNumber'].strip()
+            tmp_dict['departure_date'] = datetime.strptime(x['DepartureDate'], '%Y%m%d').strftime('%Y-%m-%d')
+            tmp_dict['arrival_date'] = datetime.strptime(x['ArrivalDate'], '%Y%m%d').strftime('%Y-%m-%d')
+            tmp_dict['leg_std'] = x['Leg_STD']
+            tmp_dict['leg_sta'] = x['Leg_STA']
+            tmp_dict['adt'] = x['ADT']
+            tmp_dict['chd'] = x['CHD']
+            tmp_dict['inf'] = x['INF']
+            tmp_dict['departure_station'] = x['DepartureStation']
+            tmp_dict['arrival_station'] = x['ArrivalStation']
+            tmp_dict['segment'] = x['Segment']
+            tmp_dict['capacity'] = x['Capacity']
+            tmp_dict['bd'] = x['BD']
+            tmp_dict['ns'] = x['NS']
+            tmp_dict['pax_rev'] = x['PaxRev']
+            tmp_dict['baggage_amount'] = float(x['BaggageAmount'])
+            tmp_dict['other_rev'] = float(x['Other_Rev'])
+            tmp_dict['cargo_rev'] = float(x['CargoRev'])
+            tmp_dict['v_cost'] = float(x['VCost'])
+            tmp_dict['f_cost'] = float(x['FCost'])
+            tmp_dict['total_cost'] = float(x['TotalCost'])
+            tmp_dict['qtqn'] = x['QTQN']
+            tmp_dict['fls_type'] = x['FLS_TYPE']
             results.append(tmp_dict)
         
         context['task_instance'].xcom_push(key='transform_data', value=results)
@@ -141,8 +146,11 @@ class FLT_BLTask(object):
         client = bigquery.Client()
         query = """
             #standardSQL
-            DELETE {table_id} WHERE FlightDate = {date}
-        """.format(table_id=self.table_id, date=context['yesterday_ds_nodash'])
+            DELETE `{table_id}` WHERE flight_date = '{date}'
+        """.format(
+            table_id=self.table_id,
+            date=datetime.strptime(context['yesterday_ds_nodash'], '%Y%m%d').strftime('%Y-%m-%d')
+        )
 
         try:
             query_job = client.query(query)
