@@ -14,8 +14,7 @@ services:
         depends_on:
             - postgres
         environment:
-            - LOAD_EX=n
-            - EXECUTOR=Local
+            - AIRFLOW__CORE__EXECUTOR=LocalExecutor
         volumes:
             - ./dags:/usr/local/airflow/dags
             - ./resources:/usr/local/airflow/resources

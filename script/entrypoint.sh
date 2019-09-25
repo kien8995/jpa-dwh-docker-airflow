@@ -6,26 +6,32 @@ TRY_LOOP="20"
 : "${REDIS_PORT:="6379"}"
 : "${REDIS_PASSWORD:=""}"
 
-: "${POSTGRES_HOST:="postgres"}"
-: "${POSTGRES_PORT:="5432"}"
-: "${POSTGRES_USER:="airflow"}"
-: "${POSTGRES_PASSWORD:="airflow"}"
-: "${POSTGRES_DB:="airflow"}"
+# : "${POSTGRES_HOST:="postgres"}"
+# : "${POSTGRES_PORT:="5432"}"
+# : "${POSTGRES_USER:="airflow"}"
+# : "${POSTGRES_PASSWORD:="airflow"}"
+# : "${POSTGRES_DB:="airflow"}"
 
 # Defaults and back-compat
-: "${AIRFLOW_HOME:="/usr/local/airflow"}"
+# : "${AIRFLOW_HOME:="/usr/local/airflow"}"
 : "${AIRFLOW__CORE__FERNET_KEY:=${FERNET_KEY:=$(python -c "from cryptography.fernet import Fernet; FERNET_KEY = Fernet.generate_key().decode(); print(FERNET_KEY)")}}"
-: "${AIRFLOW__CORE__EXECUTOR:=${EXECUTOR:-Sequential}Executor}"
+# : "${AIRFLOW__CORE__EXECUTOR:=${EXECUTOR:-Sequential}Executor}"
 
-export \
-  AIRFLOW_HOME \
-  AIRFLOW__CELERY__BROKER_URL \
-  AIRFLOW__CELERY__RESULT_BACKEND \
-  AIRFLOW__CORE__EXECUTOR \
-  AIRFLOW__CORE__FERNET_KEY \
-  AIRFLOW__CORE__LOAD_EXAMPLES \
-  AIRFLOW__CORE__SQL_ALCHEMY_CONN \
+# export AIRFLOW_HOME
+# export AIRFLOW__CELERY__BROKER_URL
+# export AIRFLOW__CELERY__RESULT_BACKEND
+# export AIRFLOW__CORE__EXECUTOR
+# export AIRFLOW__CORE__FERNET_KEY
+# export AIRFLOW__CORE__LOAD_EXAMPLES
+# export AIRFLOW__CORE__SQL_ALCHEMY_CONN
 
+# export AIRFLOW_HOME="${AIRFLOW__CORE__AIRFLOW_HOME}"
+# export AIRFLOW__CORE__DAGS_FOLDER="${AIRFLOW__CORE__AIRFLOW_HOME}/dags"
+# export AIRFLOW__CORE__SQL_ALCHEMY_CONN="mysql://airflow:airflow@localhost:3306/airflow"
+# export AIRFLOW__CORE__EXECUTOR="CeleryExecutor"
+# export AIRFLOW__CELERY__CELERY_RESULT_BACKEND="db+mysql://airflow:airflow@localhost:3306/airflow"
+# export AIRFLOW__CORE__LOAD_EXAMPLES="False"
+# export AIRFLOW_CONN_AIRFLOW_DB="mysql://airflow:airflow@localhost:3306/airflow"
 
 # Load DAGs exemples (default: Yes)
 if [[ -z "$AIRFLOW__CORE__LOAD_EXAMPLES" && "${LOAD_EX:=n}" == n ]]
@@ -72,6 +78,10 @@ fi
 case "$1" in
   webserver)
     airflow initdb
+
+    # Run admin script
+    python -i /airflow_admin_script.py
+    
     if [ "$AIRFLOW__CORE__EXECUTOR" = "LocalExecutor" ] || [ "$AIRFLOW__CORE__EXECUTOR" = "SequentialExecutor" ]; then
       # With the "Local" and "Sequential" executors it should all run in one container.
       airflow scheduler &

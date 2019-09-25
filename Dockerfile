@@ -1,9 +1,16 @@
 FROM python:3.7-slim-stretch
-LABEL maintainer="kien tran"
+LABEL maintainer="kientd.aits"
 
 # Never prompts the user for choices on installation/configuration of packages
 ENV DEBIAN_FRONTEND noninteractive
 ENV TERM linux
+
+# Postgres
+ENV POSTGRES_HOST postgres
+ENV POSTGRES_PORT 5432
+ENV POSTGRES_USER airflow
+ENV POSTGRES_PASSWORD airflow
+ENV POSTGRES_DB airflow
 
 # Airflow
 ARG AIRFLOW_VERSION=1.10.5
@@ -11,6 +18,18 @@ ARG AIRFLOW_USER_HOME=/usr/local/airflow
 ARG AIRFLOW_DEPS=""
 ARG PYTHON_DEPS=""
 ENV AIRFLOW_HOME=${AIRFLOW_USER_HOME}
+
+# Airflow core config
+ENV AIRFLOW__CORE__LOAD_EXAMPLES False
+ENV AIRFLOW__CORE__DAGS_FOLDER ${AIRFLOW_USER_HOME}/dags
+ENV AIRFLOW__CORE__LOGS_FOLDER ${AIRFLOW_USER_HOME}/logs
+ENV AIRFLOW__CORE__EXECUTOR SequentialExecutor
+ENV AIRFLOW__CORE__SQL_ALCHEMY_CONN postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+
+# Airflow admin user
+ENV AIRFLOW_ADMIN_USER admin
+ENV AIRFLOW_ADMIN_EMAIL kientd.aits@vietnamairlines.com
+ENV AIRFLOW_ADMIN_PASS Admin@123
 
 # Define en_US.
 ENV LANGUAGE en_US.UTF-8
@@ -56,7 +75,7 @@ RUN set -ex \
     && pip install pyOpenSSL \
     && pip install ndg-httpsclient \
     && pip install pyasn1 \
-    && pip install apache-airflow[crypto,celery,postgres,hive,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
+    && pip install apache-airflow[crypto,password,celery,postgres,hive,jdbc,mysql,ssh${AIRFLOW_DEPS:+,}${AIRFLOW_DEPS}]==${AIRFLOW_VERSION} \
     && pip install 'redis==3.2' \
     && pip install requests \
     && pip install google-cloud-bigquery \
@@ -73,6 +92,7 @@ RUN set -ex \
         /usr/share/doc-base
 
 COPY script/entrypoint.sh /entrypoint.sh
+COPY script/airflow_admin_script.py /airflow_admin_script.py
 COPY config/airflow.cfg ${AIRFLOW_USER_HOME}/airflow.cfg
 
 RUN chown -R airflow: ${AIRFLOW_USER_HOME}
