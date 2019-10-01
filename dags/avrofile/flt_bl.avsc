@@ -1,0 +1,113 @@
+{
+    "namespace": "flt_bl.avro",
+    "type": "record",
+    "name": "FLT_BL",
+    "fields": [
+        {
+            "name": "flight_date",
+            "type": "string"
+        },
+        {
+            "name": "carrier_code",
+            "type": "string"
+        },
+        {
+            "name": "flight_number",
+            "type": "string"
+        },
+        {
+            "name": "departure_date",
+            "type": "string"
+        },
+        {
+            "name": "arrival_date",
+            "type": "string"
+        },
+        {
+            "name": "leg_std",
+            "type": "string"
+        },
+        {
+            "name": "leg_sta",
+            "type": "string"
+        },
+        {
+            "name": "adt",
+            "type": "int"
+        },
+        {
+            "name": "chd",
+            "type": "int"
+        },
+        {
+            "name": "inf",
+            "type": "int"
+        },
+        {
+            "name": "departure_station",
+            "type": "string"
+        },
+        {
+            "name": "arrival_station",
+            "type": "string"
+        },
+        {
+            "name": "segment",
+            "type": "string"
+        },
+        {
+            "name": "capacity",
+            "type": "int"
+        },
+        {
+            "name": "bd",
+            "type": "int"
+        },
+        {
+            "name": "ns",
+            "type": "int"
+        },
+        {
+            "name": "pax_rev",
+            "type": "float"
+        },
+        {
+            "name": "baggage_amount",
+            "type": "float"
+        },
+        {
+            "name": "other_rev",
+            "type": "float"
+        },
+        {
+            "name": "cargo_rev",
+            "type": "float"
+        },
+        {
+            "name": "v_cost",
+            "type": "float"
+        },
+        {
+            "name": "f_cost",
+            "type": "float"
+        },
+        {
+            "name": "total_cost",
+            "type": "float"
+        },
+        {
+            "name": "qtqn",
+            "type": [
+                "string",
+                "null"
+            ]
+        },
+        {
+            "name": "fls_type",
+            "type": [
+                "string",
+                "null"
+            ]
+        }
+    ]
+}
