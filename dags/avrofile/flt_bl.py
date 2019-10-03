@@ -163,5 +163,6 @@ class FLT_BLTask(object):
             blob.upload_from_filename(filename='dags/avrofile/flt_bl.avro')
         except Exception as e:
             print(e)
-        finally:
-            os.remove('dags/avrofile/flt_bl.avro')
+        
+        if os.path.exists("dags/avrofile/flt_bl.avro"):
+            os.remove("dags/avrofile/flt_bl.avro")
