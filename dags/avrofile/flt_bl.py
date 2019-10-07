@@ -1,6 +1,6 @@
 import os
 from google.cloud import bigquery, storage
-from datetime import datetime
+from datetime import datetime, timedelta
 from airflow.operators.python_operator import PythonOperator, ShortCircuitOperator
 from google.cloud.exceptions import NotFound
 import requests
@@ -9,6 +9,7 @@ from avro.datafile import DataFileReader, DataFileWriter
 from avro.io import DatumReader, DatumWriter
 from utils.bigquery import check_table_exist
 from utils.json import is_jsonable
+from utils.datetime import day_from_unix_epoch
 
 class FLT_BLTask(object):
     def __init__(self, dag):
@@ -105,6 +106,8 @@ class FLT_BLTask(object):
         run_date = context['yesterday_ds_nodash']
         URL = "http://10.223.19.8:1988/api/partner/aitsgetreportodsbyday?startday={fromDate}&endday={toDate}".format(fromDate=run_date, toDate=run_date)
         response = requests.get(url = URL).json()
+        print("asdasdasasasdasdasdasdsdfsfgfd, {}", run_date)
+        print(day_from_unix_epoch(datetime.strptime(response[0]['FlightDate'], '%Y%m%d')))
         if is_jsonable(response):
             context['task_instance'].xcom_push(key='json_data', value=response)
             return True
@@ -116,11 +119,11 @@ class FLT_BLTask(object):
         results = []
         for x in data:
             tmp_dict = {}
-            tmp_dict['flight_date'] = datetime.strptime(x['FlightDate'], '%Y%m%d').strftime('%Y-%m-%d')
+            tmp_dict['flight_date'] = day_from_unix_epoch(datetime.strptime(x['FlightDate'], '%Y%m%d') + timedelta(hours=7))
             tmp_dict['carrier_code'] = x['CarrierCode']
             tmp_dict['flight_number'] = x['FlightNumber'].strip()
-            tmp_dict['departure_date'] = datetime.strptime(x['DepartureDate'], '%Y%m%d').strftime('%Y-%m-%d')
-            tmp_dict['arrival_date'] = datetime.strptime(x['ArrivalDate'], '%Y%m%d').strftime('%Y-%m-%d')
+            tmp_dict['departure_date'] = day_from_unix_epoch(datetime.strptime(x['DepartureDate'], '%Y%m%d') + timedelta(hours=7))
+            tmp_dict['arrival_date'] = day_from_unix_epoch(datetime.strptime(x['ArrivalDate'], '%Y%m%d') + timedelta(hours=7))
             tmp_dict['leg_std'] = x['Leg_STD']
             tmp_dict['leg_sta'] = x['Leg_STA']
             tmp_dict['adt'] = x['ADT']
@@ -150,7 +153,7 @@ class FLT_BLTask(object):
         data = context['task_instance'].xcom_pull(task_ids=self.task_id_3, key='transform_data')
         schema = avro.schema.Parse(open("dags/avrofile/flt_bl.avsc", "rb").read())
 
-        writer = DataFileWriter(open("dags/avrofile/flt_bl.avro", "wb"), DatumWriter(), schema)
+        writer = DataFileWriter(open("dags/avrofile/flt_bl.avro", "wb"), DatumWriter(), schema, codec="deflate")
         for d in data:
             writer.append(d)
         writer.close()

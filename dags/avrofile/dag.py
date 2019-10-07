@@ -12,14 +12,13 @@ default_args = {
     "email_on_retry": False,
     "retries": 1,
     "retry_delay": timedelta(minutes=5),
-    "catchup": False,
     # 'queue': 'bash_queue',
     # 'pool': 'backfill',
     # 'priority_weight': 10,
     # 'end_date': datetime(2019, 1, 1),
 }
 
-dag = DAG("avrofile", default_args=default_args, schedule_interval=timedelta(days = 1))
+dag = DAG("avrofile", default_args=default_args, catchup=False, schedule_interval=timedelta(days = 1))
 
 with dag:
     start = DummyOperator(

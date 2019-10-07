@@ -5,7 +5,10 @@
     "fields": [
         {
             "name": "flight_date",
-            "type": "string"
+            "type": {
+                "type": "int",
+                "logicalType": "date"
+            }
         },
         {
             "name": "carrier_code",
@@ -17,11 +20,17 @@
         },
         {
             "name": "departure_date",
-            "type": "string"
+            "type": {
+                "type": "int",
+                "logicalType": "date"
+            }
         },
         {
             "name": "arrival_date",
-            "type": "string"
+            "type": {
+                "type": "int",
+                "logicalType": "date"
+            }
         },
         {
             "name": "leg_std",
